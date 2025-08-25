@@ -44,7 +44,7 @@ This project demonstrates:
 ```bash
 # 1. Clone the repository
 git clone <your-repo-url>
-cd neon-tasks-dream
+cd todo-app-lakebase
 
 # 2. Install dependencies
 npm install
@@ -67,28 +67,26 @@ npm start
 1. **Fork this repository** to your own Git account
 2. **Create a Git folder** in your Databricks workspace pointing to your forked repository
 3. **Create a custom app** in Databricks Apps and deploy from the Git folder
+   - **Important:** During app creation, add your database as a resource
+   - This will automatically configure the necessary environment variables
 
 ### Environment Variables
 
-Create a `.env` file in the root directory:
+The required environment variables will be automatically configured when you add the database as a resource during app creation. You can view and manage these variables in:
 
-```env
-# Lakebase/Databricks Configuration
-DATABRICKS_HOST=your-databricks-host
-DATABRICKS_CLIENT_ID=your-client-id
-DATABRICKS_CLIENT_SECRET=your-client-secret
+**App Detail Page → Environment Tab**
 
-# PostgreSQL Configuration
-PGHOST=your-postgres-host
-PGPORT=5432
-PGUSER=your-postgres-user
-PGDATABASE=your-database-name
-PGSSLMODE=require
-PGAPPNAME=todo-app
-
-# Server Configuration
-PORT=3001
-```
+The following variables should be available:
+- `DATABRICKS_HOST`
+- `DATABRICKS_CLIENT_ID`
+- `DATABRICKS_CLIENT_SECRET`
+- `PGHOST`
+- `PGPORT`
+- `PGUSER`
+- `PGDATABASE`
+- `PGSSLMODE`
+- `PGAPPNAME`
+- `PORT`
 
 ## 🗄️ Database Setup
 
@@ -140,99 +138,29 @@ npm run build
 databricks apps deploy
 ```
 
-### Step 3: Configure Environment Variables
+### Step 3: Verify Environment Variables
 
-In your Databricks app settings, add the following environment variables:
+The environment variables should be automatically configured when you added the database as a resource. You can verify and manage them in:
 
-```env
-DATABRICKS_HOST=your-databricks-host
-DATABRICKS_CLIENT_ID=your-client-id
-DATABRICKS_CLIENT_SECRET=your-client-secret
-PGHOST=your-postgres-host
-PGPORT=5432
-PGUSER=your-postgres-user
-PGDATABASE=your-database-name
-PGSSLMODE=require
-PGAPPNAME=todo-app
-PORT=3001
-```
+**App Detail Page → Environment Tab**
 
 **Important:** The `PGUSER` should match the service principal ID you granted permissions to in the database setup.
 
-## 🔧 Key Components
-
-### 1. Unified Server (`server.js`)
-- Serves React frontend from `dist/` directory
-- Provides RESTful API at `/api/*` endpoints
-- Handles Lakebase OAuth2 authentication
-- Graceful fallback when database not connected
-
-### 2. Lakebase Integration (`server/lakebase.js`)
-- Automatic OAuth2 token refresh (every 15 minutes)
-- PostgreSQL connection pooling
-- SSL support for secure connections
-- Error handling and retry logic
-
-### 3. Frontend API Service (`src/services/api.ts`)
-- TypeScript interfaces for type safety
-- Relative API URLs for unified deployment
-- Error handling and response parsing
-- Centralized API communication
-
-### 4. React Components
-- **TodoApp**: Main application logic and state management
-- **TodoInput**: Add new todos with validation
-- **TodoItem**: Individual todo with edit/delete functionality
-- **TodoFilters**: Filter todos by status (all/active/completed)
-
-## 🎨 Features
-
-- ✅ **Real-time CRUD operations** with Lakebase
-- ✅ **Beautiful UI** with shadcn/ui components
-- ✅ **Responsive design** that works on all devices
-- ✅ **TypeScript** for type safety
-- ✅ **Hot reload** during development
-- ✅ **Automatic token management** for Lakebase
-- ✅ **Error handling** with user-friendly messages
-- ✅ **Loading states** and optimistic updates
-- ✅ **Toast notifications** for user feedback
-
-## 🔍 API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/todos` | Get all todos |
-| POST | `/api/todos` | Create new todo |
-| PATCH | `/api/todos/:id` | Update todo (text or completed) |
-| DELETE | `/api/todos/:id` | Delete todo |
-| GET | `/api/health` | Health check |
-
-## 🛠️ Development
-
-### Available Scripts
-
-```bash
-npm run dev          # Start Vite dev server (frontend only)
-npm run build        # Build React app for production
-npm start           # Start unified server (frontend + API)
-npm run preview     # Preview built app
-npm run lint        # Run ESLint
-```
 
 ### Project Structure
 
 ```
-neon-tasks-dream/
+todo-app-lakebase/
 ├── src/                    # React frontend source
 │   ├── components/         # React components
 │   ├── services/          # API service layer
 │   └── pages/             # Page components
 ├── server/                # Backend utilities
-│   ├── lakebase.js        # Lakebase connection
-│   └── env.example        # Environment template
+│   └── lakebase.js        # Lakebase connection
 ├── dist/                  # Built React app (generated)
 ├── server.js              # Unified server (frontend + API)
 ├── package.json           # Dependencies and scripts
+├── .env.example           # Environment variables template
 └── README.md              # This file
 ```
 
