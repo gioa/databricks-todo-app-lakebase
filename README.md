@@ -116,35 +116,13 @@ GRANT ALL PRIVILEGES ON TABLE public.todos TO "your-service-principal-id";
 
 ## 🚀 Databricks Deployment
 
-### Step 1: Prepare Your Repository
+### Deploy to Databricks
 
-1. **Fork or clone this repository** to your own Git account
-2. **Update environment variables** in your local `.env` file with your Lakebase credentials
-3. **Build the application** locally to ensure everything works:
+1. **Create a Git folder** in your Databricks workspace pointing to the repository
+2. **Create a custom app** in Databricks Apps, **add database resource**
+3. **Click Deploy**, select the Git folder to deploy. Done!
 
-```bash
-npm install
-npm run build
-```
-
-### Step 2: Deploy to Databricks
-
-1. **Create a Git folder** in your Databricks workspace that points to your repository
-2. **Create a custom app** in Databricks Apps
-3. **Deploy from the Git folder** - Databricks will auto-detect your app configuration
-
-```bash
-# Alternative: Deploy using Databricks CLI
-databricks apps deploy
-```
-
-### Step 3: Verify Environment Variables
-
-The environment variables should be automatically configured when you added the database as a resource. You can verify and manage them in:
-
-**App Detail Page → Environment Tab**
-
-**Important:** The `PGUSER` should match the service principal ID you granted permissions to in the database setup.
+**Note:** Environment variables are automatically configured when you add the database as a resource during app creation.
 
 
 ### Project Structure
@@ -164,33 +142,7 @@ todo-app-lakebase/
 └── README.md              # This file
 ```
 
-## 🚨 Troubleshooting
 
-### Common Issues
-
-1. **"Database not connected"**
-   - Check environment variables in `.env`
-   - Verify Lakebase credentials
-   - Ensure database permissions
-
-2. **"Port already in use"**
-   - Change `PORT` in `.env` or `app.yml`
-   - Kill existing processes on the port
-
-3. **"OAuth token failed"**
-   - Verify `DATABRICKS_HOST`, `CLIENT_ID`, `CLIENT_SECRET`
-   - Check network connectivity to Databricks
-
-4. **"App not available" on Databricks**
-   - Ensure `npm run build` was executed
-   - Check that `dist/` folder exists
-   - Verify environment variables in Databricks UI
-   - Confirm Git folder is properly connected to your repository
-   - Check that the custom app is deployed from the correct Git folder
-
-### Debug Mode
-
-For detailed logging, set `NODE_ENV=development` in your environment variables.
 
 ## 🤝 Contributing
 
