@@ -52,6 +52,7 @@ npm install
 # 3. Set up environment variables
 cp server/env.example .env
 # Edit .env with your Lakebase credentials
+# **Note:** For local development, you may need to generate a new client secret for your app service principal
 
 # 4. Build the frontend
 npm run build
@@ -62,17 +63,18 @@ npm start
 # 6. Open http://localhost:3001
 ```
 
-### Databricks Setup
+## 🚀 Databricks Setup & Deployment
+
+### Deploy to Databricks
 
 1. **Fork this repository** to your own Git account
-2. **Create a Git folder** in your Databricks workspace pointing to your forked repository
-3. **Create a custom app** in Databricks Apps and deploy from the Git folder
-   - **Important:** During app creation, add your database as a resource
-   - This will automatically configure the necessary environment variables
+2. **Create a Git folder** in your Databricks workspace pointing to your repository
+3. **Create a custom app** in Databricks Apps, **add database resource**
+4. **Click Deploy**, select the Git folder to deploy. Done!
 
 ### Environment Variables
 
-The required environment variables will be automatically configured when you add the database as a resource during app creation. You can view and manage these variables in:
+Environment variables are automatically configured when you add the database as a resource during app creation. You can view and manage them in:
 
 **App Detail Page → Environment Tab**
 
@@ -87,6 +89,8 @@ The following variables should be available:
 - `PGSSLMODE`
 - `PGAPPNAME`
 - `PORT`
+
+**Note:** The service principal ID can be found in the environment variables as `DATABRICKS_CLIENT_ID` or `PGUSER`.
 
 ## 🗄️ Database Setup
 
@@ -110,19 +114,6 @@ After creating the table, you need to grant permissions to your app's service pr
 -- Grant all privileges on the todos table
 GRANT ALL PRIVILEGES ON TABLE public.todos TO "your-service-principal-id";
 ```
-
-
-**Note:** The service principal ID can be found in the environment variables of your deployed app as `DATABRICKS_CLIENT_ID` or `PGUSER`.
-
-## 🚀 Databricks Deployment
-
-### Deploy to Databricks
-
-1. **Create a Git folder** in your Databricks workspace pointing to the repository
-2. **Create a custom app** in Databricks Apps, **add database resource**
-3. **Click Deploy**, select the Git folder to deploy. Done!
-
-**Note:** Environment variables are automatically configured when you add the database as a resource during app creation.
 
 
 ### Project Structure
