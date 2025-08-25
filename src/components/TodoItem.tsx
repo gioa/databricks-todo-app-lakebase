@@ -3,14 +3,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Trash2, Edit3, Check, X } from 'lucide-react';
-import { Todo } from './TodoApp';
+import { Todo } from '@/services/api';
 import { cn } from '@/lib/utils';
 
 interface TodoItemProps {
   todo: Todo;
-  onToggle: (id: string) => void;
-  onDelete: (id: string) => void;
-  onEdit: (id: string, newText: string) => void;
+  onToggle: (id: number) => void;
+  onDelete: (id: number) => void;
+  onEdit: (id: number, newText: string) => void;
 }
 
 export const TodoItem = ({ todo, onToggle, onDelete, onEdit }: TodoItemProps) => {

@@ -3,73 +3,135 @@ import { TodoInput } from './TodoInput';
 import { TodoItem } from './TodoItem';
 import { TodoFilters } from './TodoFilters';
 import { Card } from '@/components/ui/card';
-
-export interface Todo {
-  id: string;
-  text: string;
-  completed: boolean;
-  createdAt: Date;
-}
+import { apiService, Todo } from '@/services/api';
+import { useToast } from '@/hooks/use-toast';
 
 export type FilterType = 'all' | 'active' | 'completed';
 
 export const TodoApp = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [filter, setFilter] = useState<FilterType>('all');
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  // Load todos from localStorage on mount
+  // Load todos from API on mount
   useEffect(() => {
-    const savedTodos = localStorage.getItem('todos');
-    if (savedTodos) {
-      try {
-        const parsedTodos = JSON.parse(savedTodos).map((todo: any) => ({
-          ...todo,
-          createdAt: new Date(todo.createdAt)
-        }));
-        setTodos(parsedTodos);
-      } catch (error) {
-        console.error('Error loading todos from localStorage:', error);
-      }
-    }
+    loadTodos();
   }, []);
 
-  // Save todos to localStorage whenever todos change
-  useEffect(() => {
-    localStorage.setItem('todos', JSON.stringify(todos));
-  }, [todos]);
-
-  const addTodo = (text: string) => {
-    const newTodo: Todo = {
-      id: crypto.randomUUID(),
-      text: text.trim(),
-      completed: false,
-      createdAt: new Date()
-    };
-    setTodos(prev => [newTodo, ...prev]);
+  const loadTodos = async () => {
+    try {
+      setLoading(true);
+      const data = await apiService.getTodos();
+      setTodos(data);
+    } catch (error) {
+      console.error('Error loading todos:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load todos. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const toggleTodo = (id: string) => {
-    setTodos(prev => 
-      prev.map(todo => 
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-    );
+  const addTodo = async (text: string) => {
+    try {
+      const newTodo = await apiService.createTodo({ text: text.trim() });
+      setTodos(prev => [newTodo, ...prev]);
+      toast({
+        title: "Success",
+        description: "Todo added successfully!",
+      });
+    } catch (error) {
+      console.error('Error adding todo:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add todo. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const deleteTodo = (id: string) => {
-    setTodos(prev => prev.filter(todo => todo.id !== id));
+  const toggleTodo = async (id: number) => {
+    try {
+      const todo = todos.find(t => t.id === id);
+      if (!todo) return;
+      
+      const updatedTodo = await apiService.updateTodo(id, { completed: !todo.completed });
+      setTodos(prev => 
+        prev.map(todo => 
+          todo.id === id ? updatedTodo : todo
+        )
+      );
+    } catch (error) {
+      console.error('Error toggling todo:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update todo. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const editTodo = (id: string, newText: string) => {
-    setTodos(prev => 
-      prev.map(todo => 
-        todo.id === id ? { ...todo, text: newText.trim() } : todo
-      )
-    );
+  const deleteTodo = async (id: number) => {
+    try {
+      await apiService.deleteTodo(id);
+      setTodos(prev => prev.filter(todo => todo.id !== id));
+      toast({
+        title: "Success",
+        description: "Todo deleted successfully!",
+      });
+    } catch (error) {
+      console.error('Error deleting todo:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete todo. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const clearCompleted = () => {
-    setTodos(prev => prev.filter(todo => !todo.completed));
+  const editTodo = async (id: number, newText: string) => {
+    try {
+      const updatedTodo = await apiService.updateTodo(id, { text: newText.trim() });
+      setTodos(prev => 
+        prev.map(todo => 
+          todo.id === id ? updatedTodo : todo
+        )
+      );
+      toast({
+        title: "Success",
+        description: "Todo updated successfully!",
+      });
+    } catch (error) {
+      console.error('Error editing todo:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update todo. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const clearCompleted = async () => {
+    try {
+      const completedTodos = todos.filter(todo => todo.completed);
+      await Promise.all(completedTodos.map(todo => apiService.deleteTodo(todo.id)));
+      setTodos(prev => prev.filter(todo => !todo.completed));
+      toast({
+        title: "Success",
+        description: "Completed todos cleared successfully!",
+      });
+    } catch (error) {
+      console.error('Error clearing completed todos:', error);
+      toast({
+        title: "Error",
+        description: "Failed to clear completed todos. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const filteredTodos = todos.filter(todo => {
@@ -99,7 +161,11 @@ export const TodoApp = () => {
           <div className="p-6">
             <TodoInput onAddTodo={addTodo} />
             
-            {todos.length > 0 && (
+            {loading ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <p className="text-lg">Loading todos...</p>
+              </div>
+            ) : todos.length > 0 ? (
               <>
                 <TodoFilters 
                   filter={filter} 
@@ -130,9 +196,7 @@ export const TodoApp = () => {
                   </div>
                 )}
               </>
-            )}
-
-            {todos.length === 0 && (
+            ) : (
               <div className="text-center py-12 text-muted-foreground">
                 <p className="text-lg">Your todo list is empty</p>
                 <p>Add a task above to get started!</p>
